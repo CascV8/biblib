@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Biblib</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232f5d50'/><text x='16' y='23' font-size='19' font-family='Georgia' text-anchor='middle' fill='white'>&#8220;</text></svg>">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="icon-btn only-mobile" id="menuBtn" aria-label="Projects">&#9776;</button>
+    <div class="brand"><span class="mark">&ldquo;</span>Biblib</div>
+    <span class="tagline">Citations and bibliographies, formatted for you</span>
+    <div class="account" id="account"></div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <h2>Projects</h2>
+        <button class="btn small" id="newProject">+ New</button>
+      </div>
+      <ul id="projectList" class="project-list"></ul>
+      <div class="guest-note" id="guestNote" hidden>
+        Projects are saved in this browser only.
+        <button class="link" data-auth="signup">Create a free account</button> to keep them safe and use them on any device.
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="project-head">
+        <input id="projectName" class="project-name" aria-label="Project name" spellcheck="false">
+        <div class="controls">
+          <label>Style <select id="styleSelect"></select></label>
+          <label>Font
+            <select id="fontSelect">
+              <option>Times New Roman</option><option>Arial</option><option>Calibri</option><option>Georgia</option><option>Garamond</option>
+            </select>
+          </label>
+          <label>Size
+            <select id="sizeSelect"><option>10</option><option>11</option><option selected>12</option><option>14</option></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="cite-box">
+        <div class="cite-types" role="tablist" aria-label="Source type">
+          <span class="cite-label">Cite a</span>
+          <button class="chip active" data-source="website">Website</button>
+          <button class="chip" data-source="book">Book</button>
+          <button class="chip" data-source="journal">Journal</button>
+          <button class="chip" data-source="preformatted">Pre-formatted</button>
+          <div class="menu-wrap">
+            <button class="chip" id="moreBtn" aria-haspopup="true">More &#9662;</button>
+            <div class="menu more-menu" id="moreMenu" hidden></div>
+          </div>
+          <button class="chip ghost" id="manualBtn">Enter manually</button>
+        </div>
+        <form id="searchForm" class="search">
+          <input id="searchInput" autocomplete="off" placeholder="Paste a URL, or search by title">
+          <button class="btn primary" id="searchBtn" type="submit">Cite</button>
+        </form>
+        <div id="status" class="status" role="status"></div>
+        <ul id="results" class="results"></ul>
+      </section>
+
+      <section class="refs">
+        <div class="refs-head">
+          <h3 id="refsTitle">Reference list</h3>
+          <div class="refs-actions">
+            <button class="btn" id="copyAll">Copy all</button>
+            <div class="menu-wrap">
+              <button class="btn" id="downloadBtn">Download &#9662;</button>
+              <div class="menu" id="downloadMenu" hidden>
+                <button data-export="doc">Word document (.doc)</button>
+                <button data-export="html">Web page (.html)</button>
+                <button data-export="txt">Plain text (.txt)</button>
+                <button data-export="bibtex">BibTeX (.bib)</button>
+                <button data-export="ris">RIS (.ris)</button>
+              </div>
+            </div>
+            <button class="btn" id="shareBtn">Share link</button>
+          </div>
+        </div>
+        <ol id="refList" class="ref-list"></ol>
+        <div id="textOnly" class="text-only" hidden></div>
+        <div id="empty" class="empty">
+          <p><strong>No sources yet.</strong></p>
+          <p>Paste a web address, DOI or ISBN above, or search for a book or article by title. Each source you cite is formatted and added here.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="editor" class="editor">
+    <form method="dialog" id="editorForm">
+      <h3 id="editorTitle">Edit source</h3>
+      <div class="field-grid" id="fields"></div>
+      <div class="pre-block" id="preBlock" hidden>
+        <div class="pre-head">Type or paste the reference exactly as it should appear. Select text and press Ctrl+I for italics.</div>
+        <div id="preField" class="pre-field" contenteditable="true" spellcheck="true"></div>
+      </div>
+      <div class="authors-block" id="authorsBlock">
+        <div class="authors-head"><span>Contributors</span><button type="button" class="btn small" id="addAuthor">+ Add contributor</button></div>
+        <div id="authors"></div>
+      </div>
+      <label class="full">Note (private, not part of the citation)<textarea id="noteField" rows="2"></textarea></label>
+      <div class="editor-preview" id="editorPreview"></div>
+      <div class="editor-actions">
+        <button type="button" class="btn" id="cancelEdit">Cancel</button>
+        <button type="submit" class="btn primary" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="authDialog" class="editor auth">
+    <form id="authForm" novalidate>
+      <h3 id="authTitle">Log in</h3>
+      <p class="auth-sub" id="authSub"></p>
+      <div id="authFields"></div>
+      <div class="auth-error" id="authError" role="alert"></div>
+      <div class="editor-actions">
+        <button type="button" class="btn" id="authCancel">Cancel</button>
+        <button type="submit" class="btn primary" id="authSubmit">Log in</button>
+      </div>
+      <p class="auth-switch" id="authSwitch"></p>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="config.js"></script>
+  <script src="vendor/biblib-format.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
